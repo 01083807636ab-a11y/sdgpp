@@ -1,4 +1,4 @@
-"""냉장고 식재료 알림 | 실행: streamlit run app.py
+"""냉장뾱 | 실행: streamlit run app.py
 SQLite 로컬 저장. Streamlit Community Cloud 로컬 디스크는 영구 저장소가 아닙니다.
 """
 import json
@@ -9,7 +9,54 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="냉장고 식재료 알림", page_icon="🥬", layout="wide")
+st.set_page_config(page_title="냉장뾱", page_icon="🧊", layout="wide")
+
+
+def show_brand_intro():
+    """Non-blocking CSS intro, once per Streamlit session; no sound/autoplay."""
+    if st.session_state.get("naengjang_bbyok_intro_seen"):
+        return
+    st.session_state["naengjang_bbyok_intro_seen"] = True
+    st.html("""
+    <style>
+    .bbyok-intro {position:fixed; inset:0; z-index:999990;
+      background:#effbf5; display:flex; align-items:center; justify-content:center;
+      text-align:center; pointer-events:none; animation:bbyok-away .4s 1.9s forwards;
+      font-family:ui-rounded,'Malgun Gothic',sans-serif; color:#164c3f;}
+    .bbyok-brand {animation:bbyok-pop .8s cubic-bezier(.2,.9,.3,1.3) both; padding:24px;}
+    .bbyok-fridge {position:relative; margin:0 auto 22px; width:100px; height:136px;
+      border:4px solid #164c3f; border-radius:22px; background:#92e0bf;
+      box-shadow:7px 8px 0 #d1efdf;}
+    .bbyok-fridge:before {content:'';position:absolute;left:0;right:0;top:43px;
+      height:4px;background:#164c3f;}
+    .bbyok-handle {position:absolute;left:12px;top:17px;width:5px;height:15px;
+      border-radius:4px;background:#164c3f;box-shadow:0 44px 0 #164c3f;}
+    .bbyok-face {position:absolute;left:33px;top:66px;font-size:25px;letter-spacing:3px;}
+    .bbyok-word {position:absolute;right:-38px;top:-18px;background:#ffd66e;
+      border:2px solid #164c3f;border-radius:50%;padding:10px;font-size:18px;font-weight:900;
+      transform:rotate(12deg);}
+    .bbyok-title {font-size:44px;font-weight:900;letter-spacing:-2px;line-height:1.25;}
+    .bbyok-tag {font-size:15px;margin-top:12px;color:#447465;}
+    @keyframes bbyok-pop {0% {opacity:0;transform:scale(.25) translateY(35px)}
+      55% {opacity:1;transform:scale(1.12) translateY(-8px)}
+      78% {transform:scale(.96)} 100% {opacity:1;transform:scale(1)}}
+    @keyframes bbyok-away {to {opacity:0;visibility:hidden;}}
+    @media (prefers-reduced-motion:reduce) {
+      .bbyok-brand {animation:none;} .bbyok-intro {animation:bbyok-away .01s .6s forwards;}
+    }
+    </style>
+    <div class="bbyok-intro" role="status" aria-label="냉장뾱 시작 화면">
+      <div class="bbyok-brand">
+        <div class="bbyok-fridge" aria-hidden="true"><div class="bbyok-handle"></div>
+          <div class="bbyok-face">◡</div><div class="bbyok-word">뾱!</div></div>
+        <div class="bbyok-title">냉장뾱</div>
+        <div class="bbyok-tag">우리 집 냉장고에, 뾱! 하고 여유를</div>
+      </div>
+    </div>
+    """)
+
+show_brand_intro()
+
 DB_PATH = Path(os.environ.get("FRIDGE_DB_PATH", "fridge_data.sqlite3"))
 UNITS = ["개", "g", "kg", "ml", "L", "봉", "팩", "병"]
 LOCATIONS = ["냉장", "냉동", "실온"]
@@ -215,7 +262,7 @@ def recipe_matches(items, today):
 
 
 initialize()
-st.title("🥬 냉장고 식재료 알림")
+st.title("🧊 냉장뾱")
 st.caption("가족과 같은 냉장고를 보고, 남은 재료로 요리를 찾아보세요.")
 st.info("👨‍👩‍👧‍👦 가족 공유: 가족에게 같은 앱 주소를 보내세요. 같은 서버의 목록을 함께 사용하며 아래 목록은 10초마다 갱신됩니다.")
 st.caption("주의: 로그인·초대코드가 없는 방식입니다. 앱에 접속할 수 있는 사람은 누구나 재고를 보고 수정할 수 있어요.")
